@@ -1,0 +1,37 @@
+[gd_scene load_steps=7 format=3 uid="uid://c7y65bj8uqhcm"]
+
+[ext_resource type="Script" uid="uid://cg1t1rc3e3q45" path="res://card.gd" id="1_q5obu"]
+[ext_resource type="Texture2D" uid="uid://cjqg8qg3jhpjv" path="res://sprites/suits/0.tres" id="2_e484p"]
+[ext_resource type="Texture2D" uid="uid://cher4ndamqk8v" path="res://sprites/card.png" id="2_fpac0"]
+[ext_resource type="Texture2D" uid="uid://dvvdtjjttr34r" path="res://sprites/ranks/0.tres" id="3_fpac0"]
+[ext_resource type="Material" uid="uid://bf1earwfyufhg" path="res://sprites/b.tres" id="4_fpac0"]
+
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_rjlel"]
+size = Vector2(6.25, 38)
+
+[node name="Card" type="Area2D"]
+script = ExtResource("1_q5obu")
+
+[node name="Sprite2D" type="Sprite2D" parent="."]
+position = Vector2(13.5, -20)
+texture = ExtResource("2_fpac0")
+
+[node name="suitparticles" type="GPUParticles2D" parent="Sprite2D"]
+emitting = false
+amount = 16
+texture = ExtResource("2_e484p")
+lifetime = 0.01
+process_material = ExtResource("4_fpac0")
+
+[node name="rankparticles" type="GPUParticles2D" parent="Sprite2D"]
+scale = Vector2(0.833, 1)
+amount = 16
+texture = ExtResource("3_fpac0")
+lifetime = 0.01
+collision_base_size = 0.0
+process_material = ExtResource("4_fpac0")
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="."]
+position = Vector2(13.5, -20)
+scale = Vector2(4, 1)
+shape = SubResource("RectangleShape2D_rjlel")
