@@ -1,10 +1,9 @@
-[gd_scene load_steps=7 format=3 uid="uid://c7y65bj8uqhcm"]
+[gd_scene load_steps=6 format=3 uid="uid://c7y65bj8uqhcm"]
 
 [ext_resource type="Script" uid="uid://cg1t1rc3e3q45" path="res://card.gd" id="1_q5obu"]
 [ext_resource type="Texture2D" uid="uid://cjqg8qg3jhpjv" path="res://sprites/suits/0.tres" id="2_e484p"]
 [ext_resource type="Texture2D" uid="uid://cher4ndamqk8v" path="res://sprites/card.png" id="2_fpac0"]
 [ext_resource type="Texture2D" uid="uid://dvvdtjjttr34r" path="res://sprites/ranks/0.tres" id="3_fpac0"]
-[ext_resource type="Material" uid="uid://bf1earwfyufhg" path="res://sprites/b.tres" id="4_fpac0"]
 
 [sub_resource type="RectangleShape2D" id="RectangleShape2D_rjlel"]
 size = Vector2(6.25, 38)
@@ -16,20 +15,26 @@ script = ExtResource("1_q5obu")
 position = Vector2(13.5, -20)
 texture = ExtResource("2_fpac0")
 
-[node name="suitparticles" type="GPUParticles2D" parent="Sprite2D"]
-emitting = false
-amount = 16
+[node name="suitparticles" type="CPUParticles2D" parent="Sprite2D"]
+amount = 512
 texture = ExtResource("2_e484p")
 lifetime = 0.01
-process_material = ExtResource("4_fpac0")
+emission_shape = 4
+emission_points = PackedVector2Array(2.5, 16, -1.5, -15)
+emission_colors = PackedColorArray()
+gravity = Vector2(0, 0)
 
-[node name="rankparticles" type="GPUParticles2D" parent="Sprite2D"]
+[node name="rankparticles" type="CPUParticles2D" parent="Sprite2D"]
 scale = Vector2(0.833, 1)
 amount = 16
 texture = ExtResource("3_fpac0")
 lifetime = 0.01
-collision_base_size = 0.0
-process_material = ExtResource("4_fpac0")
+emission_shape = 4
+emission_points = PackedVector2Array(-9.6, -15.5, 9.6, 15.5)
+emission_colors = PackedColorArray()
+gravity = Vector2(0, 0)
+scale_amount_min = 0.83
+scale_amount_max = 0.83
 
 [node name="CollisionShape2D" type="CollisionShape2D" parent="."]
 position = Vector2(13.5, -20)

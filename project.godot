@@ -19,6 +19,12 @@ config/icon="res://icon.svg"
 
 main="*res://game.gd"
 
+[display]
+
+window/size/viewport_width=393
+window/size/viewport_height=393
+window/size/resizable=false
+
 [rendering]
 
 textures/canvas_textures/default_texture_filter=0

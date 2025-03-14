@@ -16,7 +16,7 @@ func _init():
 			card.rank = i
 			card.suit = j
 			card.complete = true
-			card.position = Vector2(30*i, 43*j)
+			card.position = Vector2(30*i+3, 43*j)
 			stock.append(card)
 			add_child(card)
 			

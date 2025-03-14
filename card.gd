@@ -20,8 +20,8 @@ const suitpositions = {
 12 : [Vector2(.5,0),Vector2(.5,1),Vector2(.5,1),Vector2(.5,1),Vector2(.5,1),Vector2(.5,1),Vector2(.5,1),Vector2(.5,1),Vector2(.5,1),Vector2(.5,1),Vector2(.5,1),Vector2(.5,1),Vector2(.5,1)]
 }
 
-@onready var suitrender:GPUParticles2D = $Sprite2D/suitparticles
-@onready var rankrender:GPUParticles2D = $Sprite2D/rankparticles
+@onready var suitrender:CPUParticles2D = $Sprite2D/suitparticles
+@onready var rankrender:CPUParticles2D = $Sprite2D/rankparticles
 
 func _ready():
 	while !complete:
@@ -33,6 +33,9 @@ func _ready():
 func readyup():
 	suitrender.texture = load("res://sprites/suits/"+str(suit)+".tres")
 	rankrender.texture = load("res://sprites/ranks/"+str(rank)+".tres")
+	var awaaga:PackedVector2Array = suitrender.emission_points
 	for i in range(0,suit):
-		suitrender.emission_points.append(suitpositions[suit][i])
-	suitrender.restart()
+		awaaga.append(suitpositions[suit][i])
+	suitrender.emission_points = awaaga
+	print(suitrender.emission_points)
+		
