@@ -150,7 +150,7 @@ func checkmove():
 					not area.athome and (
 						(area.rank == rank + 1 and area.suit % 2 != suit % 2)
 						or
-						(rank == main.rankct - 1)
+						(rank == main.rankct - 1 and area.pileindex == 0 and len(main.piles[area.pile]) == 0)
 					)
 				))
 				or
