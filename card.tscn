@@ -34,6 +34,7 @@ texture = ExtResource("3_fpac0")
 lifetime = 0.01
 preprocess = 0.5
 use_fixed_seed = true
+seed = 3222296320
 emission_shape = 4
 emission_points = PackedVector2Array(-9.6, -15.5, 9.6, 15.5)
 emission_colors = PackedColorArray()

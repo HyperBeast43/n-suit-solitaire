@@ -41,5 +41,6 @@ func _ready():
 	for i in range(0, pilect):
 		for j in range(0, i+1):
 			piles[i].append(stock.pop_back())
-			piles[i].front().z_index = j
-		piles[i].front().flip()	
+			piles[i].back().pile = i
+			piles[i].back().z_index = j
+		piles[i].back().flip()	
