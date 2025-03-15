@@ -6,6 +6,7 @@ var faceup:bool = false
 var complete:bool = false
 var hovered:bool = false
 var dragged:bool = false 
+var whereami = null
 
 @onready var sprite:Sprite2D = $Sprite2D
 @onready var suitrender:CPUParticles2D = $Sprite2D/suitparticles
@@ -40,7 +41,7 @@ func flip():
 		sprite.texture = preload("res://sprites/back.png")
 
 func _process(_delta):
-	var whereami = main.stock.find(self) 
+	whereami = main.stock.find(self) 
 	if !Input.is_action_pressed("leftclick") and hovered:
 		dragged = false
 	if Input.is_action_just_pressed("leftclick") and hovered and faceup:
