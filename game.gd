@@ -34,6 +34,10 @@ func _ready():
 		a.pile = i
 		piles.append([a])
 		add_child(a)
+	if true:
+		var a = empty_card()
+		a.stockrefresher = true
+		add_child(a)
 	for i in range(0, suitct):
 		var a = empty_card()
 		a.home = i
@@ -47,13 +51,19 @@ func _ready():
 			card.complete = true
 			stock.append(card)
 			add_child(card)
-	stock.shuffle()
+	#stock.shuffle()
 	for i in range(0, pilect):
 		for j in range(0, i+1):
 			piles[i].append(stock.pop_back())
 			piles[i].back().pile = i
 			piles[i].back().zind = j
 		piles[i].back().flip()	
+
+func _process(_delta):
+	var won = true
+	for home in main.homes:
+		if len(home) != rankct: won = false
+	if won: print("yaey")
 
 func empty_card():
 	var empty = preload("res://card.tscn").instantiate()

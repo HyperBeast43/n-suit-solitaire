@@ -21,10 +21,11 @@ main="*res://game.gd"
 
 [display]
 
-window/size/viewport_width=788
-window/size/viewport_height=788
+window/size/viewport_width=606
+window/size/viewport_height=606
 window/size/resizable=false
 window/stretch/scale=2.0
+window/stretch/scale_mode="integer"
 
 [input]
 
@@ -39,3 +40,4 @@ leftclick={
 textures/canvas_textures/default_texture_filter=0
 renderer/rendering_method="gl_compatibility"
 renderer/rendering_method.mobile="gl_compatibility"
+environment/defaults/default_clear_color=Color(3.2031e-05, 0.34984, 0.0809409, 1)

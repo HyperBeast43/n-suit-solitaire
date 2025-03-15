@@ -15,6 +15,8 @@ var dragindex:int = -1
 var guh = []
 var athome:bool = false
 var zind:int = 0
+var stockrefresher:bool = false
+var easepos:Vector2 = Vector2(0,0)
 
 @onready var sprite:Sprite2D = $Sprite2D
 @onready var suitrender:CPUParticles2D = $Sprite2D/suitparticles
@@ -24,7 +26,7 @@ var zind:int = 0
 
 func _ready():
 	if suit != -1: sprite.texture = preload("res://sprites/card.png")
-	position = Vector2(30*(rank)+3, 43*(suit+1))
+	easepos = Vector2(30*(rank)+3, 43*(suit+1))
 	while !complete:
 		pass
 	readyup()
@@ -57,6 +59,16 @@ func flip():
 		sprite.texture = preload("res://sprites/back.png")
 
 func _process(_delta):
+	position = (position+easepos*(PI-1))/PI
+	if stockrefresher:
+		easepos = Vector2i(3,43)
+		z_index = -1
+		dragged = false
+	if Input.is_action_just_pressed("leftclick") and stockrefresher and len(main.stock) == 0:
+		for i in range(0,len(main.stockpile)):
+			var card = main.stockpile.pop_front()
+			card.flip()
+			main.stock.append(card)
 	if dragged: z_index = zind+main.cardcount
 	else: z_index = zind 
 	athome = (home != -1)
@@ -70,7 +82,9 @@ func _process(_delta):
 	stockindex = main.stock.find(self) 
 	homeindex = main.homes[home].find(self)
 	if not(self in main.stockpile): zind = max(stockindex, pileindex)
-	if Input.is_action_just_pressed("leftclick") and hovered and faceup and suit != -1 and (not(self in main.stockpile) or self == main.stockpile.back()):
+	if Input.is_action_just_pressed("leftclick") and !stockrefresher and hovered and faceup and suit != -1 and (not(self in main.stockpile) or self == main.stockpile.back()):
+		if self.athome and (self.homeindex + 1 != len(main.homes[self.home])):
+			return 
 		if main.move == null:
 			main.move = self
 			if self in main.stockpile:
@@ -96,22 +110,22 @@ func _process(_delta):
 		flip()
 		return
 	if dragged:
-		position = get_global_mouse_position()-Vector2(13,-20+dragindex*8)
+		easepos = get_global_mouse_position()-Vector2(13,-20+dragindex*8)
 	elif main.move == self: 
 		main.move=null 
 		checkmove()
 	if !dragged and pile>=0 and pileindex != -1:
-		position = Vector2(pile*30+3,86+(pileindex-1)*8)
-		if suit == -1: position = position+Vector2(0,8)
+		easepos = Vector2(pile*30+3,86+(pileindex-1)*8)
+		if suit == -1: easepos = easepos+Vector2(0,8)
 		return
 	if !dragged and home>=0:
-		position = Vector2(home*30+63,43)
+		easepos = Vector2(home*30+63,43)
 		return
 	if self in main.stockpile and !dragged:
-		position = Vector2(33,43)
+		easepos = Vector2(33,43)
 		return
 	if stockindex != -1:
-		position = Vector2(3,43)
+		easepos = Vector2(3,43)
 		return
 	if !Input.is_action_pressed("leftclick"):
 		dragged = false
@@ -128,9 +142,9 @@ func checkmove():
 	var target_pile = -1
 	for area in overlapping_areas:
 		if area != self and area.faceup:  
-			distance = position.distance_to(area.position)
+			distance = easepos.distance_to(area.easepos)
 			if distance < min_distance and (
-				area.pileindex+1 == len(main.piles[area.pile])
+				(area.pileindex+1 == len(main.piles[area.pile])
 				and
 				(
 					not area.athome and (
@@ -138,12 +152,14 @@ func checkmove():
 						or
 						(rank == main.rankct - 1)
 					)
-				)
+				))
 				or
 				(
 					area.athome and (
 						(area.suit == suit or area.suit == -1)
-					and area.rank == rank - 1)
+						and (area.rank == rank - 1)
+						and (area.homeindex+1 == len(main.homes[area.home]))
+					)
 				)
 			):
 				min_distance = distance
