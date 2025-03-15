@@ -64,7 +64,7 @@ func _process(_delta):
 		easepos = Vector2i(3,43)
 		z_index = -1
 		dragged = false
-	if Input.is_action_just_pressed("leftclick") and stockrefresher and len(main.stock) == 0:
+	if Input.is_action_just_pressed("leftclick") and stockrefresher and len(main.stock) == 0 and len(main.stockpile) > 1:
 		for i in range(0,len(main.stockpile)):
 			var card = main.stockpile.pop_front()
 			card.flip()

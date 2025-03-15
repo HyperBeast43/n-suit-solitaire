@@ -51,7 +51,7 @@ func _ready():
 			card.complete = true
 			stock.append(card)
 			add_child(card)
-	#stock.shuffle()
+	stock.shuffle()
 	for i in range(0, pilect):
 		for j in range(0, i+1):
 			piles[i].append(stock.pop_back())
