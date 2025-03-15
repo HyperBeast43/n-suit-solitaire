@@ -22,13 +22,23 @@ var piles = []
 var stock = []
 var homes = []
 var stockpile = []
-var cardcount = main.suitct*main.rankct
+const cardcount = main.suitct*main.rankct
 var move = null
 var zind:int = 0
+var dragged = []
+var once:bool = true
 
 func _ready():
 	for i in range(0, pilect):
-		piles.append([])
+		var a = empty_card()
+		a.pile = i
+		piles.append([a])
+		add_child(a)
+	for i in range(0, suitct):
+		var a = empty_card()
+		a.home = i
+		homes.append([a])
+		add_child(a)
 	for i in range(0, rankct):
 		for j in range(0,suitct):
 			var card = preload("res://card.tscn").instantiate()
@@ -42,5 +52,13 @@ func _ready():
 		for j in range(0, i+1):
 			piles[i].append(stock.pop_back())
 			piles[i].back().pile = i
-			piles[i].back().z_index = j
+			piles[i].back().zind = j
 		piles[i].back().flip()	
+
+func empty_card():
+	var empty = preload("res://card.tscn").instantiate()
+	empty.rank = -1
+	empty.suit = -1
+	empty.faceup = true
+	empty.complete = true
+	return empty
