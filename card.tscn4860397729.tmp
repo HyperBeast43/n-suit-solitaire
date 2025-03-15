@@ -2,7 +2,7 @@
 
 [ext_resource type="Script" uid="uid://cg1t1rc3e3q45" path="res://card.gd" id="1_q5obu"]
 [ext_resource type="Texture2D" uid="uid://cjqg8qg3jhpjv" path="res://sprites/suits/0.tres" id="2_e484p"]
-[ext_resource type="Texture2D" uid="uid://cher4ndamqk8v" path="res://sprites/card.png" id="2_fpac0"]
+[ext_resource type="Texture2D" uid="uid://cgatn7r240dtu" path="res://sprites/cards/card5.png" id="2_fpac0"]
 [ext_resource type="Texture2D" uid="uid://dvvdtjjttr34r" path="res://sprites/ranks/0.tres" id="3_fpac0"]
 
 [sub_resource type="RectangleShape2D" id="RectangleShape2D_rjlel"]
@@ -22,6 +22,7 @@ texture = ExtResource("2_e484p")
 lifetime = 0.01
 use_fixed_seed = true
 seed = 1
+fixed_fps = 1
 emission_shape = 4
 emission_points = PackedVector2Array(2.5, 16, -1.5, -15)
 emission_colors = PackedColorArray()
@@ -34,6 +35,7 @@ texture = ExtResource("3_fpac0")
 lifetime = 0.01
 preprocess = 0.5
 use_fixed_seed = true
+fixed_fps = 2
 emission_shape = 4
 emission_points = PackedVector2Array(-9.6, -15.5, 9.6, 15.5)
 emission_colors = PackedColorArray()
