@@ -18,15 +18,32 @@ const suitpositions = {
 const pilect:int = 10
 const suitct:int = 8
 const rankct:int = 13
-var piles = []
-var stock = []
-var homes = []
-var stockpile = []
-const cardcount = main.suitct*main.rankct
+const colors: int = 4
+var piles: Array = []
+var stock: Array = []
+var homes: Array = []
+var stockpile: Array = []
+const cardcount = suitct*rankct
 var move = null
 var zind:int = 0
 var dragged = []
 var once:bool = true
+var enis = null
+
+func save_state():
+	var state = {}
+	
+	var state_piles = []
+	for i in range(piles.size()):
+		var pile = piles[i]
+		var pile_arr = []
+		for card in pile:
+			if card.suit == -1 or card.rank == -1: continue
+			pile_arr.append(card.serialize())
+		state_piles.append(pile_arr)
+	state["piles"] = state_piles
+	
+	print(state)
 
 func _ready():
 	for i in range(0, pilect):
@@ -51,7 +68,7 @@ func _ready():
 			card.complete = true
 			stock.append(card)
 			add_child(card)
-	stock.shuffle()
+	stock.reverse()#.shuffle()
 	for i in range(0, pilect):
 		for j in range(0, i+1):
 			piles[i].append(stock.pop_back())
@@ -62,8 +79,11 @@ func _ready():
 func _process(_delta):
 	var won = true
 	for home in main.homes:
-		if len(home) != rankct: won = false
-	if won: print("yaey")
+		if len(home) != rankct+1: won = false
+	if !enis and won: 
+		enis = preload("res://wiener.tscn").instantiate()
+		add_child(enis)
+	if enis: enis.position = Vector2i(151,151)
 
 func empty_card():
 	var empty = preload("res://card.tscn").instantiate()
@@ -72,3 +92,9 @@ func empty_card():
 	empty.faceup = true
 	empty.complete = true
 	return empty
+
+func _input(event: InputEvent) -> void:
+	if !event.is_pressed():
+		return
+	if event.is_action("debug.savestate"):
+		save_state()

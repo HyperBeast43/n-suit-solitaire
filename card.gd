@@ -22,12 +22,13 @@ var easepos:Vector2 = Vector2(0,0)
 @onready var suitrender:CPUParticles2D = $Sprite2D/suitparticles
 @onready var rankrender:CPUParticles2D = $Sprite2D/rankparticles
 
-
+func serialize() -> Dictionary:
+	return {"suit": self.suit, "rank": self.rank, "faceup": self.faceup}
 
 func _ready():
 	if suit != -1: sprite.texture = preload("res://sprites/card.png")
 	easepos = Vector2(30*(rank)+3, 43*(suit+1))
-	while !complete:
+	while !complete: #complete gets set to true once the sript that instantiates card.gd is done so that stuff doesnt happen prematurely
 		pass
 	readyup()
 	flip()
@@ -143,12 +144,13 @@ func checkmove():
 	for area in overlapping_areas:
 		if area != self and area.faceup:  
 			distance = easepos.distance_to(area.easepos)
+#			print(area.suit % main.colors, (suit + main.colors - 1) % main.colors)
 			if distance < min_distance and (
 				(area.pileindex+1 == len(main.piles[area.pile])
 				and
 				(
 					not area.athome and (
-						(area.rank == rank + 1 and area.suit % 2 != suit % 2)
+						(area.rank == rank + 1 and (area.suit % main.colors) == ((suit + main.colors - 1) % main.colors))
 						or
 						(rank == main.rankct - 1 and area.pileindex == 0 and len(main.piles[area.pile]) == 1)
 					)
@@ -177,7 +179,7 @@ func checkmove():
 	if target.home == -1: target_pile = target.pile  
 	else: target_pile = target.home
 
-	if !target.athome:
+	if !target.athome and !athome:
 		if target_pile >= 0:
 			if not(self in main.stockpile):
 				if !main.piles[pile][pileindex-1].faceup and main.piles[pile][pileindex-1].suit != -1:
