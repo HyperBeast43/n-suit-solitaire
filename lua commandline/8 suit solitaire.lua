@@ -138,6 +138,7 @@ function s8.init()
 	s8.pull()
 	print()
 	s8.help()
+	print()
 	s8.guide()
 end
 
@@ -193,10 +194,10 @@ the frontmost card of tableau 1 to the spades home.]],
 
 function s8.guide()
 	print([[Black -> Red -> Blue -> Yellow -> Black
-	Black: Spades, Wands
-	Red: Hearts, Cups
-	Blue: Clubs, Shields
-	Yellow: Diamonds, Fleurons]])
+Black: Spades, Wands
+Red: Hearts, Cups
+Blue: Clubs, Shields
+Yellow: Diamonds, Fleurons]])
 end
 
 function s8.help(cmd)
