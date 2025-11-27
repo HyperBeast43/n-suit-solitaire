@@ -25,11 +25,14 @@ function s8.move(qfrom,qto,qamt,sudo)
 	to = ens(to)
 	local checkcard = ens(from[#from-amt+1])
 	local destcard = ens(to[#to])
+	local m4 = function(n,ofs) --prevent nil arithmetic
+	  if n~=nil then return (n+(ofs or 0))%4 else return nil end
+	end
 	local achiral = #to<2 or not ens(to[#to-1]).seen
-	local rchiraldest = (s8.sc[destcard.suit])%4==(s8.sc[ens(to[(#to)-1]).suit]-1)%4
-	local lchiraldest = (s8.sc[destcard.suit])%4==(s8.sc[ens(to[(#to)-1]).suit]+1)%4
-	local rchiralcheck = (s8.sc[checkcard.suit]-1)%4==s8.sc[destcard.suit]
-	local lchiralcheck = (s8.sc[checkcard.suit]+1)%4==s8.sc[destcard.suit]
+	local rchiraldest = m4(s8.sc[destcard.suit])==m4(s8.sc[ens(to[(#to)-1]).suit],-1)
+	local lchiraldest = m4(s8.sc[destcard.suit])==m4(s8.sc[ens(to[(#to)-1]).suit],1)
+	local rchiralcheck = m4(s8.sc[checkcard.suit],-1)==s8.sc[destcard.suit]
+	local lchiralcheck = m4(s8.sc[checkcard.suit],1)==s8.sc[destcard.suit]
 	if 
 		sudo or ( -- pull uses sudo to move from deck to stack, end-users shouldn't be able to use it because #args would be over 4)
 			from~=to and -- source==dest edgecase 
