@@ -27,7 +27,7 @@ function s8.move(qfrom,qto,qamt,sudo)
 	local destcard = ens(to[#to])
 	local achiral = #to<2 or not ens(to[#to-1]).seen
 	local rchiraldest = (s8.sc[destcard.suit])%4==(s8.sc[ens(to[(#to)-1]).suit]-1)%4
-	local lchiraldest = (s8.sc[destcard.suit])%4==(s8.sc[ens(to[(#to)+1]).suit]+1)%4
+	local lchiraldest = (s8.sc[destcard.suit])%4==(s8.sc[ens(to[(#to)-1]).suit]+1)%4
 	local rchiralcheck = (s8.sc[checkcard.suit]-1)%4==s8.sc[destcard.suit]
 	local lchiralcheck = (s8.sc[checkcard.suit]+1)%4==s8.sc[destcard.suit]
 	if 
