@@ -23,22 +23,29 @@ function s8.move(qfrom,qto,qamt,sudo)
 	to = tonumber(to) or to
 	if type(to)=='number' or type(to)=='string' then to=s8.board[to] end
 	to = ens(to)
+	checkcard = ens(from[#from-amt+1])
+	destcard = ens(to[#to])
+	local achiral = #to<2 or not ens(to[#to-1]).seen
+	local rchiraldest = (s8.sc[destcard.suit])%4==(s8.sc[ens(to[(#to)-1]).suit]-1)%4
+	local lchiraldest = (s8.sc[destcard.suit])%4==(s8.sc[ens(to[(#to)+1]).suit]+1)%4
+	local rchiralcheck = (s8.sc[checkcard.suit]-1)%4==s8.sc[destcard.suit]
+	local lchiralcheck = (s8.sc[checkcard.suit]+1)%4==s8.sc[destcard.suit]
 	if 
 		sudo or ( -- pull uses sudo to move from deck to stack, end-users shouldn't be able to use it because #args would be over 4)
 			from~=to and -- source==dest edgecase 
 			from~=s8.board.deck and -- don't take from deck! that's what pull is for
 			((from~=s8.board.stack and not from.home and not to.home) or amt==1) and -- don't take more than one from the stack, or to/from a home
 			#from~=0 and -- stop if source is empty
-			(ens(from[#from-amt+1]).seen) and -- stop if pickup card is flipped
+			(checkcard.seen) and -- stop if pickup card is flipped
 			(#to==0 or (ens(to[#to]).seen)) and -- continue if the area is empty or its top card is seen 
 			(to~=s8.board.stack) and -- do fucking NOT (unless you're sudoed)
 			( -- main logic
 				to.home and (
-					to.home==ens(from[#from-amt+1]).suit -- home suit checks for the same suit
-					and ((#to==0 and ens(from[#from-amt+1]).rank==1) or ens(from[#from-amt+1]).rank==ens(to[#to]).rank+1)  -- check if destination rank is 1 less than pickup card's rank, or if destination is empty
+					to.home==checkcard.suit -- home suit checks for the same suit
+					and ((#to==0 and checkcard.rank==1) or checkcard.rank==destcard.rank+1)  -- check if destination rank is 1 less than pickup card's rank, or if destination is empty
 				) or (
-					((s8.sc[ens(from[#from-amt+1]).suit]-1)%4==s8.sc[ens(to[#to]).suit] -- non-home suit checks for previous suit color in order 
-					and ens(from[#from-amt+1]).rank==ens(to[#to]).rank-1) -- check if destination rank is 1 more than pickup card's rank
+					((achiral or (rchiraldest and rchiralcheck) or (lchiraldest and lchiralcheck)) -- suit checks
+					and checkcard.rank==destcard.rank-1) -- check if destination rank is 1 more than pickup card's rank
 					or (#to==0 and to.tableau) -- check if destination is empty and a valid tableau
 				)
 			)
@@ -193,7 +200,9 @@ the frontmost card of tableau 1 to the spades home.]],
 }
 
 function s8.guide()
-	print([[Black -> Red -> Blue -> Yellow -> Black
+	print([[Black - Red - Blue - Yellow - Black
+Suits can go forward or backward, 
+but cannot switch directions 
 Black: Spades, Wands
 Red: Hearts, Cups
 Blue: Clubs, Shields
