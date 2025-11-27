@@ -23,8 +23,8 @@ function s8.move(qfrom,qto,qamt,sudo)
 	to = tonumber(to) or to
 	if type(to)=='number' or type(to)=='string' then to=s8.board[to] end
 	to = ens(to)
-	checkcard = ens(from[#from-amt+1])
-	destcard = ens(to[#to])
+	local checkcard = ens(from[#from-amt+1])
+	local destcard = ens(to[#to])
 	local achiral = #to<2 or not ens(to[#to-1]).seen
 	local rchiraldest = (s8.sc[destcard.suit])%4==(s8.sc[ens(to[(#to)-1]).suit]-1)%4
 	local lchiraldest = (s8.sc[destcard.suit])%4==(s8.sc[ens(to[(#to)+1]).suit]+1)%4
@@ -45,7 +45,7 @@ function s8.move(qfrom,qto,qamt,sudo)
 					and ((#to==0 and checkcard.rank==1) or checkcard.rank==destcard.rank+1)  -- check if destination rank is 1 less than pickup card's rank, or if destination is empty
 				) or (
 					((achiral or (rchiraldest and rchiralcheck) or (lchiraldest and lchiralcheck)) -- suit checks
-					and checkcard.rank==destcard.rank-1) -- check if destination rank is 1 more than pickup card's rank
+					and checkcard.rank==destcard.rank-1) -- check if destination rank is 1 more (why does -1 work??) than pickup card's rank
 					or (#to==0 and to.tableau) -- check if destination is empty and a valid tableau
 				)
 			)
