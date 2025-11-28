@@ -26,17 +26,18 @@ function s8.move(qfrom,qto,qamt,sudo)
 	local m4 = function(n,ofs) --prevent nil arithmetic
 	  if n~=nil then return (n+(ofs or 0))%4 else return nil end
 	end
-	local achiral = (#to<2 or not ens(to[#to-1]).seen)
+	local uchiral = not checkcard.seen
+	local achiral = (#to<2 or not uchiral)
 	local schiral = m4(s8.sc[checkcard.suit],2)==s8.sc[destcard.suit]
 	local rchiraldest = m4(s8.sc[destcard.suit])==m4(s8.sc[ens(to[(#to)-1]).suit],1) and ens(to[#to-1]).seen
 	local lchiraldest = m4(s8.sc[destcard.suit])==m4(s8.sc[ens(to[(#to)-1]).suit],-1) and ens(to[#to-1]).seen
 	local rchiralcheck = m4(s8.sc[checkcard.suit],-1)==s8.sc[destcard.suit]
 	local lchiralcheck = m4(s8.sc[checkcard.suit],1)==s8.sc[destcard.suit]
-	local achiralcheck = false
+	local achiralcheck = s8.sc[checkcard.suit]==s8.sc[destcard.suit] and not to.home
 	if amt>1 then --chiralchecks for moving more than one card
 		rchiralcheck = rchiralcheck and m4(s8.sc[checkcard.suit],1)==s8.sc[ens(from[#from-amt+2])]
 		lchiralcheck = lchiralcheck and m4(s8.sc[checkcard.suit],-1)==s8.sc[ens(from[#from-amt+2])]
-		achiralcheck = m4(s8.sc[checkcard.suit],2)==s8.sc[ens(from[#from-amt+2])]
+		achiralcheck = achiralcheck and m4(s8.sc[checkcard.suit],2)==s8.sc[ens(from[#from-amt+2])]
 	end
 	local chk_validchirality = (achiral or (rchiraldest and rchiralcheck) or (lchiraldest and lchiralcheck)) and not (schiral or achiralcheck)
 	if 
@@ -72,7 +73,7 @@ function s8.move(qfrom,qto,qamt,sudo)
 	else
 		print('Illegal move!')
 		print('Dest. Chirality: '..(lchiraldest and 'Left' or (rchiraldest and 'Right' or 'None')))
-		print('Tried Chirality: '..(schiral and 'Antipodal' or (rchiraldest and 'Right' or (lchiraldest and 'Left' or 'None'))))
+		print('Tried Chirality: '..(uchiral and 'Unknown' or (schiral and 'Antipodal' or (rchiraldest and 'Right' or (lchiraldest and 'Left' or 'None')))))
 		local fromstr 
 		if from.home then 
 			if #from==0 then fromstr = s8.abbrs[from.home]..'_'end
