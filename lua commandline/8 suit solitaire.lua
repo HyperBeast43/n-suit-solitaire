@@ -45,7 +45,7 @@ function s8.move(qfrom,qto,qamt,sudo)
 		)
 	then
 		local function take(source,cache,amount) -- taken table is flipped in cache but that's fine because we do it twice
-			for i=1,amount do
+			for _=1,amount do
 				table.insert(cache,source[#source])
 				table.remove(source)
 			end
@@ -104,6 +104,9 @@ function s8.pull()
 			s8.move(s8.board.stack,s8.board.deck,#s8.board.stack,true)
 			for _,v in ipairs(s8.board.deck) do
 				v.seen = false
+			end
+			for i=1,floor(#s8.board.deck/2) do
+			    s8.board.deck[i], s8.board.deck[#s8.board.deck+1-i] = s8.board.deck[#s8.board.deck+1-i], s8.board.deck[i]
 			end
 		end
 	else
