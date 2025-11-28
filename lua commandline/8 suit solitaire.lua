@@ -23,23 +23,23 @@ function s8.move(qfrom,qto,qamt,sudo)
 	to = ens(to)
 	local checkcard = ens(from[#from-amt+1])
 	local destcard = ens(to[#to])
+	local chrlcard = ens(to[#to-1])
 	local m4 = function(n,ofs) --prevent nil arithmetic
 	  if n~=nil then return (n+(ofs or 0))%4 else return nil end
 	end
 	local uchiral = not checkcard.seen
 	local achiral = (#to<2 or not uchiral)
 	local schiral = m4(s8.sc[checkcard.suit],2)==s8.sc[destcard.suit]
-	local rchiraldest = m4(s8.sc[destcard.suit])==m4(s8.sc[ens(to[(#to)-1]).suit],1) and ens(to[#to-1]).seen
-	local lchiraldest = m4(s8.sc[destcard.suit])==m4(s8.sc[ens(to[(#to)-1]).suit],-1) and ens(to[#to-1]).seen
+	local rchiraldest = m4(s8.sc[destcard.suit])==m4(s8.sc[chrlcard.suit],1) and chrlcard.seen
+	local lchiraldest = m4(s8.sc[destcard.suit])==m4(s8.sc[chrlcard.suit],-1) and chrlcard.seen
 	local rchiralcheck = m4(s8.sc[checkcard.suit],-1)==s8.sc[destcard.suit]
 	local lchiralcheck = m4(s8.sc[checkcard.suit],1)==s8.sc[destcard.suit]
 	local achiralcheck = s8.sc[checkcard.suit]==s8.sc[destcard.suit] and not to.home
 	if amt>1 then --chiralchecks for moving more than one card
-		rchiralcheck = rchiralcheck and m4(s8.sc[checkcard.suit],1)==s8.sc[ens(from[#from-amt+2])]
-		lchiralcheck = lchiralcheck and m4(s8.sc[checkcard.suit],-1)==s8.sc[ens(from[#from-amt+2])]
-		achiralcheck = achiralcheck and m4(s8.sc[checkcard.suit],2)==s8.sc[ens(from[#from-amt+2])]
+		rchiralcheck = rchiralcheck and m4(s8.sc[checkcard.suit],1)==s8.sc[ens(from[#from-amt+2]).suit]
+		lchiralcheck = lchiralcheck and m4(s8.sc[checkcard.suit],-1)==s8.sc[ens(from[#from-amt+2]).suit]
 	end
-	local chk_validchirality = (achiral or (rchiraldest and rchiralcheck) or (lchiraldest and lchiralcheck)) and not (schiral or achiralcheck)
+	local chk_validchirality = (achiral or (rchiraldest and rchiralcheck) or (lchiraldest and lchiralcheck)) and not (schiral or achiralcheck or (lchiraldest and rchiralcheck) or (rchiraldest and lchiralcheck))
 	if 
 		sudo or ( -- pull uses sudo to move from deck to stack, end-users shouldn't be able to use it because #args would be over 4)
 			from~=to and -- source==dest edgecase 
@@ -55,25 +55,19 @@ function s8.move(qfrom,qto,qamt,sudo)
 					and ((#to==0 and checkcard.rank==1) or checkcard.rank==destcard.rank+1)  -- check if destination rank is 1 less than pickup card's rank, or if destination is empty
 				) or (
 					(chk_validchirality and checkcard.rank==destcard.rank-1) -- check if destination rank is 1 more (why does -1 work??) than pickup card's rank
-					or (#to==0 and to.tableau) -- check if destination is empty and a valid tableau
+					or (#to==0 and to.tableau and checkcard.rank==13) -- check if destination is empty and a valid tableau
 				)
 			)
 		)
 	then
-		local function take(source,cache,amount) -- taken table is flipped in cache but that's fine because we do it twice
-			for i=1,amount do
-				table.insert(cache,source[#source])
-				table.remove(source)
-			end
+		local pivot = #from-amt+1
+		for _=1,amt do
+			table.insert(to,table.remove(from,pivot))
 		end
-		local t = {}
-		take(from,t,amt)
-		local l = #t
-		take(t,to,l)
 	else
 		print('Illegal move!')
 		print('Dest. Chirality: '..(lchiraldest and 'Left' or (rchiraldest and 'Right' or 'None')))
-		print('Tried Chirality: '..(uchiral and 'Unknown' or (schiral and 'Antipodal' or (rchiraldest and 'Right' or (lchiraldest and 'Left' or 'None')))))
+		print('Tried Chirality: '..(uchiral and 'Unknown' or (schiral and 'Antipodal' or (rchiralcheck and 'Right' or (lchiralcheck and 'Left' or 'None')))))
 		local fromstr 
 		if from.home then 
 			if #from==0 then fromstr = s8.abbrs[from.home]..'_'end
@@ -135,7 +129,7 @@ function s8.pull()
 			for _,v in ipairs(s8.board.deck) do
 				v.seen = false
 			end
-			for i=1,floor(#s8.board.deck/2) do
+			for i=1,math.floor(#s8.board.deck/2) do
 			    s8.board.deck[i], s8.board.deck[#s8.board.deck+1-i] = s8.board.deck[#s8.board.deck+1-i], s8.board.deck[i]
 			end
 		end
@@ -155,12 +149,12 @@ function s8.init()
 		end
 	end
 	local shuffle = function (t) -- fisher-yates algorithm
+		math.randomseed(os.time())
 		for i = #t, 2, -1 do
 			local j = math.random(i)
 			t[i], t[j] = t[j], t[i]
 		end
 	end
-	math.randomseed(os.time())
 	shuffle(s8.board.deck)
 	for i=1,10 do
 		s8.board[i]={['tableau']=true}
