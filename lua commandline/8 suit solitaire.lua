@@ -2,8 +2,6 @@ local s8 = {}
 s8.sc = {['spades']=0,['hearts']=1,['clubs']=2,['diamonds']=3,['wands']=0,['cups']=1,['shields']=2,['fleurons']=3}
 s8.suits = {'spades','hearts','clubs','diamonds','wands','cups','shields','fleurons'}
 
-
-
 function s8.move(qfrom,qto,qamt,sudo)
 	local ens = function(t)
 		if t then return t else return {['rank']=0} end
@@ -14,7 +12,7 @@ function s8.move(qfrom,qto,qamt,sudo)
 	from = qfrom or from 
 	to = qto or to 
 	amt = qamt or amt 
-	qamt = tonumber(qamt) or qamt
+	amt = tonumber(amt) or amt
 	from = tonumber(from) or from
 	from = type(from)=='string' and string.lower(from) or from
 	if type(from)=='number' or type(from)=='string' then from=s8.board[from] end -- `'key'` as shorthand for `s8.board['key']`
@@ -23,29 +21,46 @@ function s8.move(qfrom,qto,qamt,sudo)
 	to = tonumber(to) or to
 	if type(to)=='number' or type(to)=='string' then to=s8.board[to] end
 	to = ens(to)
+	local checkcard = ens(from[#from-amt+1])
+	local destcard = ens(to[#to])
+	local m4 = function(n,ofs) --prevent nil arithmetic
+	  if n~=nil then return (n+(ofs or 0))%4 else return nil end
+	end
+	local achiral = (#to<2 or not ens(to[#to-1]).seen)
+	local schiral = m4(s8.sc[checkcard.suit],2)==s8.sc[destcard.suit]
+	local rchiraldest = m4(s8.sc[destcard.suit])==m4(s8.sc[ens(to[(#to)-1]).suit],1) and ens(to[#to-1]).seen
+	local lchiraldest = m4(s8.sc[destcard.suit])==m4(s8.sc[ens(to[(#to)-1]).suit],-1) and ens(to[#to-1]).seen
+	local rchiralcheck = m4(s8.sc[checkcard.suit],-1)==s8.sc[destcard.suit]
+	local lchiralcheck = m4(s8.sc[checkcard.suit],1)==s8.sc[destcard.suit]
+	local achiralcheck = false
+	if amt>1 then --chiralchecks for moving more than one card
+		rchiralcheck = rchiralcheck and m4(s8.sc[checkcard.suit],1)==s8.sc[ens(from[#from-amt+2])]
+		lchiralcheck = lchiralcheck and m4(s8.sc[checkcard.suit],-1)==s8.sc[ens(from[#from-amt+2])]
+		achiralcheck = m4(s8.sc[checkcard.suit],2)==s8.sc[ens(from[#from-amt+2])]
+	end
+	local chk_validchirality = (achiral or (rchiraldest and rchiralcheck) or (lchiraldest and lchiralcheck)) and not (schiral or achiralcheck)
 	if 
 		sudo or ( -- pull uses sudo to move from deck to stack, end-users shouldn't be able to use it because #args would be over 4)
 			from~=to and -- source==dest edgecase 
 			from~=s8.board.deck and -- don't take from deck! that's what pull is for
 			((from~=s8.board.stack and not from.home and not to.home) or amt==1) and -- don't take more than one from the stack, or to/from a home
 			#from~=0 and -- stop if source is empty
-			(ens(from[#from-amt+1]).seen) and -- stop if pickup card is flipped
+			(checkcard.seen) and -- stop if pickup card is flipped
 			(#to==0 or (ens(to[#to]).seen)) and -- continue if the area is empty or its top card is seen 
 			(to~=s8.board.stack) and -- do fucking NOT (unless you're sudoed)
 			( -- main logic
 				to.home and (
-					to.home==ens(from[#from-amt+1]).suit -- home suit checks for the same suit
-					and ((#to==0 and ens(from[#from-amt+1]).rank==1) or ens(from[#from-amt+1]).rank==ens(to[#to]).rank+1)  -- check if destination rank is 1 less than pickup card's rank, or if destination is empty
+					to.home==checkcard.suit -- home suit checks for the same suit
+					and ((#to==0 and checkcard.rank==1) or checkcard.rank==destcard.rank+1)  -- check if destination rank is 1 less than pickup card's rank, or if destination is empty
 				) or (
-					((s8.sc[ens(from[#from-amt+1]).suit]-1)%4==s8.sc[ens(to[#to]).suit] -- non-home suit checks for previous suit color in order 
-					and ens(from[#from-amt+1]).rank==ens(to[#to]).rank-1) -- check if destination rank is 1 more than pickup card's rank
+					(chk_validchirality and checkcard.rank==destcard.rank-1) -- check if destination rank is 1 more (why does -1 work??) than pickup card's rank
 					or (#to==0 and to.tableau) -- check if destination is empty and a valid tableau
 				)
 			)
 		)
 	then
 		local function take(source,cache,amount) -- taken table is flipped in cache but that's fine because we do it twice
-			for _=1,amount do
+			for i=1,amount do
 				table.insert(cache,source[#source])
 				table.remove(source)
 			end
@@ -56,6 +71,8 @@ function s8.move(qfrom,qto,qamt,sudo)
 		take(t,to,l)
 	else
 		print('Illegal move!')
+		print('Dest. Chirality: '..(lchiraldest and 'Left' or (rchiraldest and 'Right' or 'None')))
+		print('Tried Chirality: '..(schiral and 'Antipodal' or (rchiraldest and 'Right' or (lchiraldest and 'Left' or 'None'))))
 		local fromstr 
 		if from.home then 
 			if #from==0 then fromstr = s8.abbrs[from.home]..'_'end
@@ -73,6 +90,18 @@ function s8.move(qfrom,qto,qamt,sudo)
 		print(fromstr..' '..toaster..' '..tostring(amt))
 	end
 	s8.update()
+end
+
+function s8.what()
+	print([[Chirality:
+	Imagine the 4 base suits on a circle going clockwise, with Spades on top. 
+	What direction around the circle something goes is its chirality.
+	Sp->Ht goes right, and Sp->Dm goes left.
+	Sp->Sp goes nowhere, so we say it has no chirality.
+Antipodal: 
+	Sp->Cl doesn't go nowhere, but Cl isn't left OR right of Sp. 
+	Instead, where Sp->Cl lands is directly opposite its starting point.
+	In this case, we say it has "antipodal" chirality.]])
 end
 
 function s8.update()
@@ -183,6 +212,7 @@ end
 s8.helptext = {
 	['help'] = "Shows helptext for a command.",
 	['guide'] = "Shows the order in which each suit stacks on top of each other.",
+	['what'] = "Shows definitions for terms one may be confused about.",
 	['view'] = "Shows the board. Automatically run every turn.",
 	['pull'] = [[Pulls a card from the deck to the stack. 
 Refreshes the deck if the stack's empty.]], --Does nothing if the deck's empty, so be careful.]],
@@ -196,17 +226,19 @@ the frontmost card of tableau 1 to the spades home.]],
 }
 
 function s8.guide()
-	print([[Black -> Red -> Blue -> Yellow -> Black
-Black: Spades, Wands
-Red: Hearts, Cups
-Blue: Clubs, Shields
-Yellow: Diamonds, Fleurons]])
+	print([[Black - Red - Blue - Yellow - Black
+Suits can go forward or backward, 
+but cannot switch directions. 
+  Black: Spades, Wands
+  Red: Hearts, Cups
+  Blue: Clubs, Shields
+  Yellow: Diamonds, Fleurons]])
 end
 
 function s8.help(cmd)
 	if not cmd then print([[
-Funcs: help [command?], exit, guide, view, pull, init, move [from, to, number?]/[to]
-For help with a command (e.g. move), type help move ]])
+Funcs: help [command?], exit, guide, view, pull, init, what, move [from, to, number?]/[to]
+For help with a command (e.g. move), type help move]])
 	else 
 		print(s8.helptext[cmd]) 
 	end
